@@ -85,4 +85,49 @@ output application/json
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<flow name="GetStoresDetailsFlow" doc:id="a431f570-97ac-4365-af08-2bfde7c6c70c" >
+		<set-variable value="#[attributes.queryParams.postalCode]" doc:name="Set Variable" doc:id="8d4dd54b-7419-4df0-9712-7d66c706194e" variableName="postalCode" />
+		<http:request method="GET" doc:name="Request" doc:id="450ecc61-6f5a-45cd-a6b4-2250eb944327" config-ref="HTTP_Request_configuration" path="${request-stores.path}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"X-Rapidapi-Key" : "3023a67861msh0eb707c9fd31682p12e9c9jsn4bd95787f3d4",
+	"X-RapidAPI-Host" : "walmart.p.rapidapi.com"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	postalCode : attributes.queryParams.postalCode
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="319199d1-c060-4a8d-9a7b-4dc1e6c3210e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+items: payload.data.storesBySearchTerm.stores map (item,index) -> {
+	stores: item mapObject (value, key) -> {
+		(key): value
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="ec75237b-6610-459e-bf55-606b6de568f3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"store_address": payload.items[0].stores.address.address ++ ", " ++
+ payload.items[0].stores.address.city ++ ", " ++
+ payload.items[0].stores.address.state ++ ", " ++
+ payload.items[0].stores.address.country ++ ", " ++ "( " ++
+ payload.items[0].stores.address.postalCode ++ " )" ,
+ "store_distance": payload.items[0].stores.distance ,
+ "store_id": payload.items[0].stores.id,
+ "store_name": payload.items[0].stores.displayName
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 </mule>

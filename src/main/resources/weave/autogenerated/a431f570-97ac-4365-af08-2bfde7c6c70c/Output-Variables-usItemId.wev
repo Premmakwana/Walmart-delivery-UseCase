@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_a431f570_97ac_4365_af08_2bfde7c6c70c_Output_Variables_usItemId = Any
+

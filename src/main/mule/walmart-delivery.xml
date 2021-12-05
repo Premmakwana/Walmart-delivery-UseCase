@@ -127,33 +127,7 @@ output application/json
 		<flow-ref doc:name="Flow Reference" doc:id="af2a8ba1-a61d-40f3-bf28-bfe32f733cef" name="GetProductDetailsFlow"/>
     </flow>
     <flow name="get:\store\list:walmart-delivery-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  example: {
-    stores: {
-      distance: 0.43,
-      id: 3341,
-      displayName: "Dallas Neighborhood Market",
-      storeType: {
-        id: "4",
-        displayName: "Neighborhood Market"
-      },
-      address: {
-        postalCode: "75204",
-        address: "2305 N Central Expy",
-        city: "Dallas",
-        state: "TX",
-        country: "US"
-      }
-    }
-  }
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="d22c8fdd-552e-4840-9ae0-4e47892896ae" name="GetStoresDetailsFlow"/>
     </flow>
     <flow name="post:\Append-Data:application\json:walmart-delivery-config">
 		<flow-ref doc:name="Flow Reference" doc:id="1170ce8a-8783-4d28-9b45-9a5bc08f6687" name="DatabaseAppendFlow"/>

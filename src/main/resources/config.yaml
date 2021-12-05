@@ -9,3 +9,6 @@ db:
   host : "db4free.net" 
   port : "3306"
   
+request-stores:
+  host: "walmart.p.rapidapi.com"
+  path: "/stores/list"
