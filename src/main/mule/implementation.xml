@@ -1,5 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd"></mule>
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="d774efd5-9c5b-49ea-9876-120c006008f1" >
+		<http:request-connection host="${request.host}" protocol="HTTPS"/>
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="ee7c1685-7947-42f3-a0ca-51faa3f8a528" file="config.yaml" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="79483ecd-13e3-428d-b796-8843bf15a288" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.username}" password="${db.password}" database="${db.database}" >
+			<db:connection-properties >
+				<db:connection-property key="useSSL" value="false" />
+			</db:connection-properties>
+		</db:my-sql-connection>
+	</db:config>
+	<flow name="GetProductDetailsFlow" doc:id="61f9bbf2-9824-48ce-a47a-f16065e43fec" >
+		<set-variable value="#[attributes.queryParams.usItemId]" doc:name="Set Variable" doc:id="74e95eab-28fe-445b-a9da-15a38f7d65ae" variableName="usItemId"/>
+		<http:request method="GET" doc:name="Request" doc:id="7676eb17-5f5e-47b1-b5e1-9ca545c41ec1" config-ref="HTTP_Request_configuration" path="${request.path}">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"X-Rapidapi-Key" : "3023a67861msh0eb707c9fd31682p12e9c9jsn4bd95787f3d4",
+	"X-RapidAPI-Host" : "walmart.p.rapidapi.com"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"Key" : "Value"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="1e3fa5cd-9ffd-4cd8-9a81-32ab522b8b2e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+payload.items filter ($.usItemId==vars.usItemId).productId
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="DatabaseAppendFlow" doc:id="5afa2d6d-90c6-4c6d-8625-9ea8c7e4451e" >
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="e3eac60e-ad17-4951-a590-0938612b293d" />
+		<ee:transform doc:name="Transform Message" doc:id="3ae69063-7715-4316-be86-0aa45c8de3a5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="ef0b9c97-6d8b-48a2-aab0-4f9d93127dfd" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO testdbc45.Walmart_Store_41 (order_id, store_id, store_name, store_address, store_distance, store_contact_number, product_type_id, quantity)
+VALUES (:order_id, :store_id, :store_name, :store_address, :store_distance, :store_contact_number, :product_type_id, :quantity);]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	order_id: payload.order_id,
+	store_id: payload.store_id,
+	store_name: payload.store_name,
+	store_address: payload.store_address,
+	store_distance: payload.store_distance,
+	store_contact_number: payload.store_contact_number,
+	product_type_id: payload.product_type_id,
+	quantity: payload.quantity
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="9c575ddd-adfa-42d5-9861-9ed176309dbc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"data updated"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

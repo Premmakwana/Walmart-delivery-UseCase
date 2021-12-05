@@ -1,0 +1,10 @@
+request:
+  host: "walmart.p.rapidapi.com"
+  path: "/products/list"
+  
+db:
+  database: "testdbc45" 
+  username: "c4ebatch5" 
+  password : "c4ebatch@5"
+  host : "db4free.net" 
+  port : "3306"
