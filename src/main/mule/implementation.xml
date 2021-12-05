@@ -37,9 +37,18 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-
-payload.items filter ($.usItemId==vars.usItemId).productId
-]]></ee:set-payload>
+payload.items filter ($.usItemId==attributes.queryParams.usItemId) map (value,index)-> {
+	"productId":value.productId
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="9f47213b-e704-44ff-92b6-82531952b1ff" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
