@@ -18,31 +18,22 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		</db:my-sql-connection>
 	</db:config>
 	<flow name="GetProductDetailsFlow" doc:id="61f9bbf2-9824-48ce-a47a-f16065e43fec" >
-		<set-variable value="#[attributes.queryParams.usItemId]" doc:name="Set Variable" doc:id="74e95eab-28fe-445b-a9da-15a38f7d65ae" variableName="usItemId"/>
-		<http:request method="GET" doc:name="Request" doc:id="7676eb17-5f5e-47b1-b5e1-9ca545c41ec1" config-ref="HTTP_Request_configuration" path="${request.path}">
-			<http:headers ><![CDATA[#[output application/java
+		<set-variable value="#[attributes.queryParams.usItemId as String]" doc:name="Set Variable" doc:id="74e95eab-28fe-445b-a9da-15a38f7d65ae" variableName="usItemId"/>
+		<ee:cache doc:name="Cache" doc:id="9c6d84d1-f4ed-45db-8f8c-a1044fc6cc52" >
+			<http:request method="GET" doc:name="Request" doc:id="7676eb17-5f5e-47b1-b5e1-9ca545c41ec1" config-ref="HTTP_Request_configuration" path="${request.path}">
+			<http:headers><![CDATA[#[output application/java
 ---
 {
 	"X-Rapidapi-Key" : "3023a67861msh0eb707c9fd31682p12e9c9jsn4bd95787f3d4",
 	"X-RapidAPI-Host" : "walmart.p.rapidapi.com"
 }]]]></http:headers>
-			<http:query-params ><![CDATA[#[output application/java
+			<http:query-params><![CDATA[#[output application/java
 ---
 {
 	"Key" : "Value"
 }]]]></http:query-params>
 		</http:request>
-		<ee:transform doc:name="Transform Message" doc:id="1e3fa5cd-9ffd-4cd8-9a81-32ab522b8b2e" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload.items filter ($.usItemId==attributes.queryParams.usItemId) map (value,index)-> {
-	"productId":value.productId
-	
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
+		</ee:cache>
 		<ee:transform doc:name="Transform Message" doc:id="9f47213b-e704-44ff-92b6-82531952b1ff" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
